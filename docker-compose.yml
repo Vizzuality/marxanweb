@@ -1,0 +1,43 @@
+version: "3.7"
+services:
+  server:
+    build:
+      context: ./marxan-server
+      dockerfile: Dockerfile
+    ports:
+      - "4000:80"
+    container_name: marxan-server
+    depends_on:
+      - postgresql
+  postgresql:
+    build:
+      context: ./marxan-postgresql
+      dockerfile: Dockerfile
+    container_name: marxan-postgresql
+    ports:
+      - "5433:5432"
+    volumes:
+      - marxan-postgresql-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=thargal88
+      - POSTGRES_USER=jrc
+    restart: always
+  client:
+    build:
+      context: ./marxan-client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    container_name: marxan-client
+    command: develop
+    restart: always
+    links:
+      - server
+    depends_on:
+      - server
+networks:
+  default:
+    external:
+      name: marxan-network
+volumes:
+  marxan-postgresql-data:
